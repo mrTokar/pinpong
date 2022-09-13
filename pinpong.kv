@@ -1,0 +1,35 @@
+#:kivy 1.0.9
+
+<PinPongBall>:
+    size: 50, 50
+    canvas: 
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+<PinPongGame>:
+    ball: pinpong_ball
+
+    canvas:
+        Rectangle:
+        #slash place
+            pos: self.center_x -5, 0
+            size: 10, self.height
+
+    Label:
+        #ponts 1 player
+        font_size: 70
+        center_x: root.width / 4
+        top: root.top - 50 
+        text: "0"
+
+    Label:
+        #points 2 player
+        font_size: 70
+        center_x: root.width * 3 / 4
+        top: root.top - 50
+        text: "0"
+
+    PinPongBall:
+        id: pinpong_ball
+        center: self.parent.center
