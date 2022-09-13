@@ -7,8 +7,17 @@
             pos: self.pos
             size: self.size
 
+<PinPongRacket>:
+    size: 20, 150
+    canvas:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
 <PinPongGame>:
     ball: pinpong_ball
+    pc_racket: left_racket
+    player_racket: right_racket
 
     canvas:
         Rectangle:
@@ -17,19 +26,29 @@
             size: 10, self.height
 
     Label:
-        #ponts 1 player
+        #score left player
         font_size: 70
         center_x: root.width / 4
         top: root.top - 50 
-        text: "0"
+        text: str(root.pc_racket.score)
 
     Label:
-        #points 2 player
+        #scrore right player
         font_size: 70
         center_x: root.width * 3 / 4
         top: root.top - 50
-        text: "0"
+        text: str(root.player_racket.score)
 
     PinPongBall:
         id: pinpong_ball
         center: self.parent.center
+
+    PinPongRacket:
+        id: left_racket
+        x: root.x + 10
+        center_y: root.center_y
+
+    PinPongRacket:
+        id: right_racket
+        x: root.width - self.width - 10
+        center_y: root.center_y
