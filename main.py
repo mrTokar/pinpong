@@ -62,8 +62,14 @@ class PinPongGame(Widget):
             self.restart_ball(vec=(-5,0))
 
     def on_touch_move(self, touch):
+        h = self.player_racket.height / 2 
         if touch.x > self.width - self.width/3:
-            self.player_racket.center_y = touch.y
+            if h <= touch.y <= self.height - h:
+                self.player_racket.center_y = touch.y
+            elif h > touch.y:
+                self.player_racket.center_y = h
+            else:
+                self.player_racket.center_y = self.height - h   
         #===========DEL IT=======================
         if touch.x < self.width/3:
             self.pc_racket.center_y = touch.y   
