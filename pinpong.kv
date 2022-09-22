@@ -1,4 +1,5 @@
 #:kivy 1.0.9
+#:import win kivy.core.window
 
 <PinPongBall>:
     size: 50, 50
@@ -14,10 +15,45 @@
             pos: self.pos
             size: self.size
 
+<Menu>:
+    orientation: "vertical"
+    spacing: "50sp"
+    minimum_width: 760
+    padding: dp(200), dp(50)
+
+    canvas:
+        Color:
+            rgba: 138/255, 134/255, 134/255, 0.7
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    Label:
+        text: "MENU"
+        font_size: root.height * 0.15
+        
+    Button:
+        text: "Игарть"
+        font_size: self.height * 0.5
+        on_release: root.start()
+
+    Button:
+        text: "Настройки"
+        font_size: self.height * 0.5
+        on_release: root.setting()
+
+    Button:
+        text: "Выход"
+        font_size: self.height * 0.5
+        on_release: root.exit_app()
+
+
 <PinPongGame>:
     ball: pinpong_ball
     pc_racket: left_racket
     player_racket: right_racket
+    menu: menu
 
     canvas:
         Rectangle:
@@ -52,3 +88,9 @@
         id: right_racket
         x: root.width - self.width - 10
         center_y: root.center_y
+
+    Menu:
+        id: menu
+        size: 0.95 * root.width, 0.85 * root.height
+        pos: 0.05*root.width/2, 0.10*root.width/2
+    
