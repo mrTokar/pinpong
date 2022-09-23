@@ -18,7 +18,6 @@
 <Menu>:
     orientation: "vertical"
     spacing: "50sp"
-    minimum_width: 760
     padding: dp(200), dp(50)
 
     canvas:
@@ -41,19 +40,101 @@
     Button:
         text: "Настройки"
         font_size: self.height * 0.5
-        on_release: root.setting()
+        on_release: root.open_setting()
 
     Button:
         text: "Выход"
         font_size: self.height * 0.5
         on_release: root.exit_app()
 
+<SettingsMenu>:
+	padding: dp(50), 0, dp(50), dp(70)
+    orientation: "vertical"
+    spacing: dp(10)
+
+    canvas:
+        Color:
+            rgba: 138/255, 134/255, 135/255, 0.7
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    Label:
+        text: "НАСТРОЙКИ"
+        font_size: root.height * 0.1
+    
+    Label:
+	    text_size: root.width * 0.90,root.height * 0.3
+	    valign: 'top'
+	    halign: 'center'
+        text: "Небольшой шарик, заменяющий пинг-понговый мячик, двигается по экрану по линейной траектории. Если он ударяется о периметр игрового поля, то его траектория изменяется в зависимости от угла столкновения. Если шарик отбивается ракеткой игрока, то его движение дополнительно зависит от скорости и направления движения ракетки. Ваша ракетка правая, управление которой Вы можете настроить. Периметр игрового поля обозначен краями экрана, а мячик не может покинуть поле через верхний или нижний край. В верхней части поля отображаются очки игроков, у каждого на своей половине экрана."
+        font_size: root.height * 0.03
+
+    BoxLayout:
+        orientation: "horizontal"
+        
+        BoxLayout:
+            orientation: "vertical"
+            
+            Label: 
+                text: "Звук"
+                font_size: root.height * 0.05
+                
+    		Slider:
+        		id: slider
+        		value: 100
+        		min: 0
+        		max: 100
+        		step: 1
+        		orientation: 'horizontal'
+
+   		 Label:
+        		text: str(int(slider.value)) + "%"
+        		font_size: root.height * 0.04
+        
+        BoxLayout:
+            orientation: "vertical"
+
+            Label:
+                text: "Управление"
+                font_size: root.height * 0.05
+                
+            GridLayout:
+            	cols: 2
+            	rows: 2
+                padding: root.width * 0.1, 0
+                
+				CheckBox:
+					id: mouse
+                    allow_no_selection: False
+                    active: True
+					group: "control"
+                    
+                    on_active: root.on_chkb_mouse_active(self.active)
+					
+				Label:
+					text: "Мышью"
+					font_size: root.height * 0.04
+				
+				CheckBox:
+					id: keyboard
+                    allow_no_selection: False
+					group: "control"
+
+                    on_active: root.on_chkb_keyboard_active(self.active)
+					
+				Label:
+					text: "Клавишами"
+					font_size: root.height * 0.04                
+            
 
 <PinPongGame>:
     ball: pinpong_ball
     pc_racket: left_racket
     player_racket: right_racket
     menu: menu
+    setting: setting
 
     canvas:
         Rectangle:
@@ -93,4 +174,9 @@
         id: menu
         size: 0.95 * root.width, 0.85 * root.height
         pos: 0.05*root.width/2, 0.10*root.width/2
+
+    SettingsMenu:
+        id: setting
+        size: 0.95 * root.width, 0.85 * root.height
+        pos: -1*root.width, -1*root.width
     

@@ -1,3 +1,5 @@
+from xml.dom.minidom import Attr
+from xmlrpc.client import Boolean
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
@@ -15,6 +17,7 @@ Window.minimum_height = 535
 
 class PinPongRacket(Widget):
     score = NumericProperty(0)
+    vec = 7
 
     def bounce_ball(self, ball):
         """Change ball's vecotr"""
@@ -23,6 +26,7 @@ class PinPongRacket(Widget):
             offset = (ball.center_y - self.center_y) / (self.height / 2)
             bounced = Vector(-1 * sx, sy) * 1.1
             ball.speed = bounced.x, bounced.y + offset
+            self.vec *= 1.1
 
 
 class ComputerPlayer:
@@ -83,22 +87,23 @@ class PinPongBall(Widget):
 
 
 class PinPongGame(Widget):
-    # link on ball in kv file
+    # link on kvy file
     ball = ObjectProperty(None)
-    # link on rackets in kv file
     pc_racket = ObjectProperty(None)
     player_racket = ObjectProperty(None)
     menu = ObjectProperty(None)
+    setting = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._keyboard = Window.request_keyboard(lambda: None, self)
-        if self._keyboard.widget:
-            pass
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
+        Window.bind(on_touch_move=self.move_by_using_touch)
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-        if keycode[1] == "escape":
+        if self.setting.keymode and keycode[0] in (273, 274):
+            self.move_by_using_keyboard(keycode[0])
+        elif keycode[1] == "escape":
             self.menu.open()
         return True
 
@@ -128,8 +133,8 @@ class PinPongGame(Widget):
             self.pc_racket.score += 1
             self.restart_ball(vec=(-5,0))
 
-    def on_touch_move(self, touch):
-        """Toch_move Event. Racket control"""
+    def move_by_using_touch(self, some, touch):
+        """Racket control by used touch (mouse)"""
         h = self.player_racket.height / 2 
         if touch.x > self.width - self.width/3:
             if h <= touch.y <= self.height - h:
@@ -138,7 +143,43 @@ class PinPongGame(Widget):
                 self.player_racket.center_y = h
             else:
                 self.player_racket.center_y = self.height - h
-    
+
+    def move_by_using_keyboard(self, key):
+        h = self.player_racket.height / 2
+        if key == 273:
+            res = self.player_racket.center_y + self.player_racket.vec
+            if res <= self.height - h:
+                self.player_racket.center_y = res
+            else:
+                self.player_racket.center_y = self.height - h
+        else:
+            res = self.player_racket.center_y - self.player_racket.vec
+            if h <= res:
+                self.player_racket.center_y = res
+            else:
+                self.player_racket.center_y = h
+
+
+class SettingsMenu(BoxLayout):
+    haveroot = False
+    keymode = False
+
+    def init_root_widget(self):
+        if not self.haveroot:
+            self.haveroot = True
+            for w in self.walk_reverse(): 
+                if isinstance(w, PinPongGame):
+                    self.root = w
+            
+    def on_chkb_mouse_active(self, value):
+        if value: 
+            Window.bind(on_touch_move=self.root.move_by_using_touch)
+        else:
+            Window.unbind(on_touch_move=self.root.move_by_using_touch)
+
+    def on_chkb_keyboard_active(self, value):
+        self.keymode = value
+        
 
 class Menu(BoxLayout):
     def init_root_widget(self):
@@ -147,9 +188,27 @@ class Menu(BoxLayout):
             if isinstance(w, PinPongGame):
                 self.game = w
 
+    def move_widget(self, object, action: Boolean):
+        """Change object.pos   Object is instance Menu or SettingMenu\n
+        True <=> show\n
+        False <=> hide"""
+        try:
+            if action:
+                object.pos = 0.05*self.game.width/2, 0.10*self.game.width/2
+            else: 
+                object.pos = -1*self.game.width, -1*self.game.width
+        except AttributeError:
+            self.init_root_widget()
+            if action:
+                object.pos = 0.05*self.game.width/2, 0.10*self.game.width/2
+            else: 
+                object.pos = -1*self.game.width, -1*self.game.width
+
+        self.setting = self.game.setting
+
     def start(self):
         """Start game"""
-        self.pos = self.size[0] * -1, self.size[1] * -1  # move menu
+        self.move_widget(self, False)
         try:
             self.game.restart_ball()
         except AttributeError:
@@ -160,15 +219,27 @@ class Menu(BoxLayout):
     def exit_app(self):
         exit(0)
 
-    def setting(self):
-        print(self.size, self.pos)
-        print("window", Window.size)
+    def open_setting(self):
+        try:
+            self.move_widget(self, False)
+            self.move_widget(self.setting, True)
+        except AttributeError:
+            self.init_root_widget()
+            self.move_widget(self, False)
+            self.move_widget(self.setting, True)
+        self.setting.init_root_widget()
+       
 
     def open(self):
         """Pause game and open menu"""
-        self.clock.cancel()
+        try:
+            self.clock.cancel()
+        except AttributeError:
+            # the case when the clock has not yet been created
+            self.init_root_widget()
         self.game.restart_ball(vec=(0,0))
-        self.pos = 0.05*self.game.width/2, 0.10*self.game.width/2
+        self.move_widget(self, True)
+        self.move_widget(self.setting, False)
 
 
 class PinPongApp(App):
