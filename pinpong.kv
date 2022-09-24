@@ -51,6 +51,7 @@
 	padding: dp(50), 0, dp(50), dp(70)
     orientation: "vertical"
     spacing: dp(10)
+    slider: slider
 
     canvas:
         Color:
@@ -84,10 +85,13 @@
     		Slider:
         		id: slider
         		value: 100
+                value_track: True
         		min: 0
         		max: 100
         		step: 1
         		orientation: 'horizontal'
+
+                on_value: root.on_volume(self.value)
 
    		 Label:
         		text: str(int(slider.value)) + "%"

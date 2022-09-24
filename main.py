@@ -1,4 +1,3 @@
-from tkinter import S
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
@@ -93,8 +92,11 @@ class PinPongGame(Widget):
     ball = ObjectProperty(None)
     pc_racket = ObjectProperty(None)
     player_racket = ObjectProperty(None)
+
     menu = ObjectProperty(None)
     setting = ObjectProperty(None)
+
+    soundtreck = SoundLoader.load("source\soundteck.wav")
     jump = SoundLoader.load("source\jump.wav")
 
     def __init__(self, **kwargs):
@@ -102,6 +104,9 @@ class PinPongGame(Widget):
         self._keyboard = Window.request_keyboard(lambda: None, self)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
         Window.bind(on_touch_move=self.move_by_using_touch)
+        if self.soundtreck:
+            self.soundtreck.loop = True
+            self.soundtreck.play()
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
         if self.setting.keymode and keycode[0] in (273, 274):
@@ -183,6 +188,12 @@ class SettingsMenu(BoxLayout):
 
     def on_chkb_keyboard_active(self, value):
         self.keymode = value
+
+    def on_volume(self, value):
+        self.root.pc_racket.pong.volume = value/100
+        self.root.player_racket.pong.volume = value/100
+        self.root.jump.volume = value/100
+        self.root.soundtreck.volume = value/100
         
 
 class Menu(BoxLayout):
@@ -249,10 +260,6 @@ class Menu(BoxLayout):
 class PinPongApp(App):
     def build(self):
         game = PinPongGame()
-        soundtreck = SoundLoader.load("source\soundteck.wav")
-        if soundtreck:
-            soundtreck.loop = True
-            soundtreck.play()
         return game
 
 
