@@ -176,6 +176,7 @@ class SettingsMenu(BoxLayout):
     keymode = False
 
     def init_root_widget(self):
+        """Search root widget and save its link to attribute"""
         if not self.haveroot:
             self.haveroot = True
             for w in self.walk_reverse(): 
@@ -183,15 +184,18 @@ class SettingsMenu(BoxLayout):
                     self.root = w
             
     def on_chkb_mouse_active(self, value):
+        """Switch On/Off mouse control"""
         if value: 
             Window.bind(on_touch_move=self.root.move_by_using_touch)
         else:
             Window.unbind(on_touch_move=self.root.move_by_using_touch)
 
     def on_chkb_keyboard_active(self, value):
+        """Switch On/Off keyboard control"""
         self.keymode = value
 
     def on_volume(self, value):
+        """Binded changing volum"""
         self.root.pc_racket.pong.volume = value/100
         self.root.player_racket.pong.volume = value/100
         self.root.jump.volume = value/100
