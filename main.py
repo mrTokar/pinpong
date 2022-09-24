@@ -1,14 +1,16 @@
-from xml.dom.minidom import Attr
-from xmlrpc.client import Boolean
+from tkinter import S
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
 from kivy.vector import Vector
-from kivy.clock import Clock
 from kivy.properties import (
-    NumericProperty, ReferenceListProperty, ObjectProperty, ListProperty
+    NumericProperty, ReferenceListProperty, ObjectProperty
 )
+
+from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.core.audio import SoundLoader
+
 from random import randint
 from sys import exit
 
@@ -17,17 +19,18 @@ Window.minimum_height = 535
 
 class PinPongRacket(Widget):
     score = NumericProperty(0)
-    vec = 7
+    vec = 7    
+    pong = SoundLoader.load("source\electricalpong.mp3")
 
     def bounce_ball(self, ball):
         """Change ball's vecotr"""
         if self.collide_widget(ball):
+            self.pong.play()
             sx, sy = ball.speed
             offset = (ball.center_y - self.center_y) / (self.height / 2)
             bounced = Vector(-1 * sx, sy) * 1.1
             ball.speed = bounced.x, bounced.y + offset
             self.vec *= 1.1
-
 
 class ComputerPlayer:
     def __init__(self, racket: PinPongRacket):
@@ -59,7 +62,6 @@ class ComputerPlayer:
 
 
 class PinPongBall(Widget):
-
     speed_x = NumericProperty(0)
     speed_y = NumericProperty(0)
     # shorthand for speed_x and speed_y
@@ -93,6 +95,7 @@ class PinPongGame(Widget):
     player_racket = ObjectProperty(None)
     menu = ObjectProperty(None)
     setting = ObjectProperty(None)
+    jump = SoundLoader.load("source\jump.wav")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -124,6 +127,7 @@ class PinPongGame(Widget):
         # bounce off top and bottom
         if (self.ball.y < 0) or (self.ball.top > self.height):
             self.ball.speed_y *= -1
+            self.jump.play()
 
         # bounce off left and right 
         elif self.ball.x < self.x:
@@ -148,13 +152,13 @@ class PinPongGame(Widget):
         h = self.player_racket.height / 2
         if key == 273:
             res = self.player_racket.center_y + self.player_racket.vec
-            if res <= self.height - h:
+            if res <= self.height-h:
                 self.player_racket.center_y = res
             else:
                 self.player_racket.center_y = self.height - h
         else:
             res = self.player_racket.center_y - self.player_racket.vec
-            if h <= res:
+            if res >= h:
                 self.player_racket.center_y = res
             else:
                 self.player_racket.center_y = h
@@ -188,7 +192,7 @@ class Menu(BoxLayout):
             if isinstance(w, PinPongGame):
                 self.game = w
 
-    def move_widget(self, object, action: Boolean):
+    def move_widget(self, object, action: bool):
         """Change object.pos   Object is instance Menu or SettingMenu\n
         True <=> show\n
         False <=> hide"""
@@ -214,7 +218,7 @@ class Menu(BoxLayout):
         except AttributeError:
             self.init_root_widget()
             self.game.restart_ball()
-        self.clock = Clock.schedule_interval(self.game.update, 1.0 / 100.0)
+        self.clock = Clock.schedule_interval(self.game.update, 1.0 / 200.0)
 
     def exit_app(self):
         exit(0)
@@ -245,6 +249,10 @@ class Menu(BoxLayout):
 class PinPongApp(App):
     def build(self):
         game = PinPongGame()
+        soundtreck = SoundLoader.load("source\soundteck.wav")
+        if soundtreck:
+            soundtreck.loop = True
+            soundtreck.play()
         return game
 
 
