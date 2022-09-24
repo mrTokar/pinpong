@@ -3,7 +3,7 @@ from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
 from kivy.vector import Vector
 from kivy.properties import (
-    NumericProperty, ReferenceListProperty, ObjectProperty
+    NumericProperty, ReferenceListProperty, ObjectProperty, ListProperty
 )
 
 from kivy.clock import Clock
@@ -118,6 +118,7 @@ class PinPongGame(Widget):
     def restart_ball(self, vec=(5, 0)):
         """restart ball and give him start speed(vec)"""
         self.ball.center = self.center
+        self.player_racket.vec = 7
         self.pc = ComputerPlayer(self.pc_racket)
         self.ball.create_ref(self.pc)
         self.ball.speed = Vector(vec).rotate(randint(-70, 70))
@@ -170,6 +171,7 @@ class PinPongGame(Widget):
 
 
 class SettingsMenu(BoxLayout):
+    mypos = [-1*Window.size[0], -1*Window.size[1]]
     haveroot = False
     keymode = False
 
@@ -197,6 +199,8 @@ class SettingsMenu(BoxLayout):
         
 
 class Menu(BoxLayout):
+    mypos = [0.05*Window.size[0]/2, 0.15*Window.size[1]/2]
+
     def init_root_widget(self):
         """Search root widget and save its link to attribute"""
         for w in self.walk_reverse(): 
