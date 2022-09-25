@@ -11,15 +11,15 @@ from kivy.core.window import Window
 from kivy.core.audio import SoundLoader
 
 from random import randint
-from sys import exit
+import os, sys
+from kivy.resources import resource_add_path, resource_find
 
-Window.minimum_width = 650
-Window.minimum_height = 535
 
 class PinPongRacket(Widget):
     score = NumericProperty(0)
     vec = 7    
-    pong = SoundLoader.load("source\electricalpong.mp3")
+    pong = SoundLoader.load("source\pong.mp3")
+    pong.volume = 0.8
 
     def bounce_ball(self, ball):
         """Change ball's vecotr"""
@@ -96,8 +96,9 @@ class PinPongGame(Widget):
     menu = ObjectProperty(None)
     setting = ObjectProperty(None)
 
-    soundtreck = SoundLoader.load("source\soundteck.wav")
+    soundtreck = SoundLoader.load("source\soundtreck.wav")
     jump = SoundLoader.load("source\jump.wav")
+    jump.volume = 0.8
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -171,7 +172,7 @@ class PinPongGame(Widget):
 
 
 class SettingsMenu(BoxLayout):
-    mypos = [-1*Window.size[0], -1*Window.size[1]]
+    mypos = [-10*Window.size[0], -10*Window.size[1]]
     haveroot = False
     keymode = False
 
@@ -196,9 +197,9 @@ class SettingsMenu(BoxLayout):
 
     def on_volume(self, value):
         """Binded changing volum"""
-        self.root.pc_racket.pong.volume = value/100
-        self.root.player_racket.pong.volume = value/100
-        self.root.jump.volume = value/100
+        self.root.pc_racket.pong.volume = 0.8 * value/100
+        self.root.player_racket.pong.volume = 0.8 * value/100
+        self.root.jump.volume = 0.8 * value/100
         self.root.soundtreck.volume = value/100
         
 
@@ -210,6 +211,7 @@ class Menu(BoxLayout):
         for w in self.walk_reverse(): 
             if isinstance(w, PinPongGame):
                 self.game = w
+        self.setting = self.game.setting
 
     def move_widget(self, object, action: bool):
         """Change object.pos   Object is instance Menu or SettingMenu\n
@@ -217,17 +219,15 @@ class Menu(BoxLayout):
         False <=> hide"""
         try:
             if action:
-                object.pos = 0.05*self.game.width/2, 0.10*self.game.width/2
+                object.pos = 0.05*self.game.width/2, 0.15*self.game.height/2
             else: 
-                object.pos = -1*self.game.width, -1*self.game.width
+                object.pos = -10*self.game.width, -10*self.game.height
         except AttributeError:
             self.init_root_widget()
             if action:
-                object.pos = 0.05*self.game.width/2, 0.10*self.game.width/2
+                object.pos = 0.05*self.game.width/2, 0.15*self.game.height/2
             else: 
-                object.pos = -1*self.game.width, -1*self.game.width
-
-        self.setting = self.game.setting
+                object.pos = -10*self.game.width, -10*self.game.height
 
     def start(self):
         """Start game"""
@@ -240,7 +240,7 @@ class Menu(BoxLayout):
         self.clock = Clock.schedule_interval(self.game.update, 1.0 / 200.0)
 
     def exit_app(self):
-        exit(0)
+        sys.exit(0)
 
     def open_setting(self):
         try:
@@ -268,8 +268,12 @@ class Menu(BoxLayout):
 class PinPongApp(App):
     def build(self):
         game = PinPongGame()
+        Window.minimum_width = 650
+        Window.minimum_height = 535
         return game
 
 
 if __name__ == '__main__':
+    if hasattr(sys, '_MEIPASS'):
+        resource_add_path(os.path.join(sys._MEIPASS))
     PinPongApp().run()
